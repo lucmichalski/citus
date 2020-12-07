@@ -238,6 +238,9 @@ extern ObjectAddress AlterSchemaRenameStmtObjectAddress(Node *node, bool missing
 extern void ErrorIfUnsupportedSeqStmt(CreateSeqStmt *createSeqStmt);
 extern void ErrorIfDistributedAlterSeqOwnedBy(AlterSeqStmt *alterSeqStmt);
 
+/* statistics.c - forward declarations */
+extern List * PreprocessCreateStatisticsStmt(Node *node, const char *queryString);
+extern List * GetExplicitStatisticsCommandList(Oid relationId);
 
 /* subscription.c - forward declarations */
 extern Node * ProcessCreateSubscriptionStmt(CreateSubscriptionStmt *createSubStmt);
