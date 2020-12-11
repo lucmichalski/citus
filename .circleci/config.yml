@@ -412,7 +412,12 @@ jobs:
 #      - codecov/upload:
 #          flags: 'test_11,upgrade'
 
-  test-13_check-multi:
+  test-13:
+    description: A job that does very little other than demonstrate what a parameterized job looks like
+    parameters:
+      make:
+        description: "make target"
+        type: string
     docker:
       - image: 'citus/exttester:13.1-dev20201211-4'
     working_directory: /home/circleci/project
@@ -432,110 +437,10 @@ jobs:
       - run:
           name: 'Run Test'
           command: |
-            gosu circleci .circleci/run_test.sh check-multi
+            gosu circleci .circleci/run_test.sh << parameters.make >>
           no_output_timeout: 2m
       - codecov/upload:
-          flags: 'test_13,multi'
-
-  test-13_check-mx:
-    docker:
-      - image: 'citus/exttester:13.1-dev20201211-4'
-    working_directory: /home/circleci/project
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - run:
-          name: 'Install Extension'
-          command: |
-            tar xfv "${CIRCLE_WORKING_DIRECTORY}/install-${PG_MAJOR}.tar" --directory /
-      - run:
-          name: 'Configure'
-          command: |
-            chown -R circleci .
-            gosu circleci ./configure
-      - run:
-          name: 'Run Test'
-          command: |
-            gosu circleci .circleci/run_test.sh check-multi-mx
-          no_output_timeout: 2m
-      - codecov/upload:
-          flags: 'test_13,mx'
-
-  test-13_check-vanilla:
-    docker:
-      - image: 'citus/exttester:13.1-dev20201211-4'
-    working_directory: /home/circleci/project
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - run:
-          name: 'Install Extension'
-          command: |
-            tar xfv "${CIRCLE_WORKING_DIRECTORY}/install-${PG_MAJOR}.tar" --directory /
-      - run:
-          name: 'Configure'
-          command: |
-            chown -R circleci .
-            gosu circleci ./configure
-      - run:
-          name: 'Run Test'
-          command: |
-            gosu circleci .circleci/run_test.sh check-vanilla
-          no_output_timeout: 2m
-      - codecov/upload:
-          flags: 'test_13,vanilla'
-
-  test-13_check-worker:
-    docker:
-      - image: 'citus/exttester:13.1-dev20201211-4'
-    working_directory: /home/circleci/project
-    steps:
-      - checkout
-      - attach_workspace:
-           at: .
-      - run:
-          name: 'Install Extension'
-          command: |
-            tar xfv "${CIRCLE_WORKING_DIRECTORY}/install-${PG_MAJOR}.tar" --directory /
-      - run:
-          name: 'Configure'
-          command: |
-            chown -R circleci .
-            gosu circleci ./configure
-      - run:
-          name: 'Run Test'
-          command: |
-            gosu circleci .circleci/run_test.sh check-worker
-          no_output_timeout: 2m
-      - codecov/upload:
-          flags: 'test_13,worker'
-
-  test-13_check-isolation:
-    docker:
-      - image: 'citus/exttester:13.1-dev20201211-4'
-    working_directory: /home/circleci/project
-    steps:
-      - checkout
-      - attach_workspace:
-           at: .
-      - run:
-          name: 'Install Extension'
-          command: |
-            tar xfv "${CIRCLE_WORKING_DIRECTORY}/install-${PG_MAJOR}.tar" --directory /
-      - run:
-          name: 'Configure'
-          command: |
-            chown -R circleci .
-            gosu circleci ./configure
-      - run:
-          name: 'Run Test'
-          command: |
-            gosu circleci .circleci/run_test.sh check-isolation
-          no_output_timeout: 2m
-      - codecov/upload:
-          flags: 'test_13,isolation'
+          flags: 'test_13,<< parameters.make >>'
 
   test-13_check-follower-cluster:
     docker:
@@ -571,56 +476,6 @@ jobs:
           flags: 'test_13,follower-cluster'
       - store_artifacts:
           path: '/tmp/core_dumps'
-
-  test-13_check-columnar:
-    docker:
-      - image: 'citus/exttester:13.1-dev20201211-4'
-    working_directory: /home/circleci/project
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - run:
-          name: 'Install Extension'
-          command: |
-            tar xfv "${CIRCLE_WORKING_DIRECTORY}/install-${PG_MAJOR}.tar" --directory /
-      - run:
-          name: 'Configure'
-          command: |
-            chown -R circleci .
-            gosu circleci ./configure
-      - run:
-          name: 'Run Test'
-          command: |
-            gosu circleci .circleci/run_test.sh check-columnar
-          no_output_timeout: 2m
-      - codecov/upload:
-          flags: 'test_13,columnar'
-
-  test-13_check-columnar-isolation:
-    docker:
-      - image: 'citus/exttester:13.1-dev20201211-4'
-    working_directory: /home/circleci/project
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - run:
-          name: 'Install Extension'
-          command: |
-            tar xfv "${CIRCLE_WORKING_DIRECTORY}/install-${PG_MAJOR}.tar" --directory /
-      - run:
-          name: 'Configure'
-          command: |
-            chown -R circleci .
-            gosu circleci ./configure
-      - run:
-          name: 'Run Test'
-          command: |
-            gosu circleci .circleci/run_test.sh check-columnar-isolation
-          no_output_timeout: 2m
-      - codecov/upload:
-          flags: 'test_13,columnar,isolation'
 
 #  test-13_check-failure:
 #    docker:
@@ -727,22 +582,40 @@ workflows:
 #      - test-12_check-failure:
 #          requires: [build-12]
 
-      - test-13_check-multi:
+      - test-13:
+          name: 'test-13_check-multi'
+          make: check-multi
           requires: [build-13]
-      - test-13_check-vanilla:
+      - test-13:
+          name: 'test-13_check-multi-mx'
+          make: check-multi-mx
           requires: [build-13]
-      - test-13_check-isolation:
+      - test-13:
+          name: 'test-13_check-vanilla'
+          make: check-vanilla
           requires: [build-13]
-      - test-13_check-mx:
+      - test-13:
+          name: 'test-13_check-isolation'
+          make: check-isolation
           requires: [build-13]
-      - test-13_check-worker:
+      - test-13:
+          name: 'test-13_check-worker'
+          make: check-worker
           requires: [build-13]
+
+      # TODO need to understand the coredump thing here, might be beneficial for all
       - test-13_check-follower-cluster:
           requires: [build-13]
-      - test-13_check-columnar:
+
+      - test-13:
+          name: 'test-13_check-columnar'
+          make: check-columnar
           requires: [build-13]
-      - test-13_check-columnar-isolation:
+      - test-13:
+          name: 'test-13_check-columnar-isolation'
+          make: check-columnar-isolation
           requires: [build-13]
+
 #      - test-13_check-failure:
 #          requires: [build-13]
 
