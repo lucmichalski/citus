@@ -412,14 +412,20 @@ jobs:
 #      - codecov/upload:
 #          flags: 'test_11,upgrade'
 
-  test-13:
+  run-citus-test:
     description: A job that does very little other than demonstrate what a parameterized job looks like
     parameters:
+      postgres:
+        description: "postgres major version"
+        type: integer
+      tag:
+        description: 'docker image tag to use'
+        type: string
       make:
         description: "make target"
         type: string
     docker:
-      - image: 'citus/exttester:13.1-dev20201211-4'
+      - image: 'citus/exttester:<< parameters.tag >>'
     working_directory: /home/circleci/project
     steps:
       - checkout
@@ -468,7 +474,7 @@ jobs:
           path: /tmp/core_dumps
           when: on_fail
       - codecov/upload:
-          flags: 'test_13,<< parameters.make >>'
+          flags: 'test_<< parameters.postgres >>,<< parameters.make >>'
           when: always
 
 #  test-13_check-failure:
@@ -576,36 +582,52 @@ workflows:
 #      - test-12_check-failure:
 #          requires: [build-12]
 
-      - test-13:
+      - run-citus-test:
           name: 'test-13_check-multi'
+          postgres: 13
+          tag: 13.1-dev20201211-4
           make: check-multi
           requires: [build-13]
-      - test-13:
+      - run-citus-test:
           name: 'test-13_check-multi-mx'
+          postgres: 13
+          tag: 13.1-dev20201211-4
           make: check-multi-mx
           requires: [build-13]
-      - test-13:
+      - run-citus-test:
           name: 'test-13_check-vanilla'
+          postgres: 13
+          tag: 13.1-dev20201211-4
           make: check-vanilla
           requires: [build-13]
-      - test-13:
+      - run-citus-test:
           name: 'test-13_check-isolation'
+          postgres: 13
+          tag: 13.1-dev20201211-4
           make: check-isolation
           requires: [build-13]
-      - test-13:
+      - run-citus-test:
           name: 'test-13_check-worker'
+          postgres: 13
+          tag: 13.1-dev20201211-4
           make: check-worker
           requires: [build-13]
-      - test-13:
+      - run-citus-test:
           name: 'test-13_check-follower-cluster'
+          postgres: 13
+          tag: 13.1-dev20201211-4
           make: check-follower-cluster
           requires: [build-13]
-      - test-13:
+      - run-citus-test:
           name: 'test-13_check-columnar'
+          postgres: 13
+          tag: 13.1-dev20201211-4
           make: check-columnar
           requires: [build-13]
-      - test-13:
+      - run-citus-test:
           name: 'test-13_check-columnar-isolation'
+          postgres: 13
+          tag: 13.1-dev20201211-4
           make: check-columnar-isolation
           requires: [build-13]
 
