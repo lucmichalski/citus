@@ -401,7 +401,7 @@ workflows:
           make: check-columnar
           requires: [build-12]
       - run-citus-test:
-          name: 'test-13_check-columnar-isolation'
+          name: 'test-12_check-columnar-isolation'
           postgres: 12
           tag: 12.5-dev20201211-1
           make: check-columnar-isolation
