@@ -437,10 +437,22 @@ jobs:
       - run:
           name: 'Run Test'
           command: |
-            gosu circleci .circleci/run_test.sh << parameters.make >>
+            gosu circleci make -C src/test/regress << parameters.make >>
           no_output_timeout: 2m
+      - run:
+          name: 'Regressions'
+          command: |
+            if [ -f "src/test/regress/regression.diffs" ]; then
+              cat src/test/regress/regression.diffs
+              exit 1
+            fi
+          when: on_fail
+      - store_artifacts:
+          path: src/test/regress/regression.diffs
+          when: on_fail
       - codecov/upload:
           flags: 'test_13,<< parameters.make >>'
+          when: always
 
   test-13_check-follower-cluster:
     docker:
