@@ -188,6 +188,10 @@ jobs:
       postgres:
         description: "postgres major version"
         type: integer
+      image:
+        description: 'docker image to use as for the tests'
+        type: string
+        default: citus/exttester
       tag:
         description: 'docker image tag to use'
         type: string
@@ -195,7 +199,7 @@ jobs:
         description: "make target"
         type: string
     docker:
-      - image: 'citus/exttester:<< parameters.tag >>'
+      - image: '<< parameters.image >>:<< parameters.tag >>'
     working_directory: /home/circleci/project
     steps:
       - checkout
@@ -247,18 +251,6 @@ jobs:
           flags: 'test_<< parameters.postgres >>,<< parameters.make >>'
           when: always
 
-#  test-13_check-failure:
-#    docker:
-#      - image: 'citus/failtester:13.0'
-#    working_directory: /home/circleci/project
-#    steps:
-#      - checkout
-#      - attach_workspace:
-#          at: .
-#      - run:
-#          name: 'Install and Test (check-failure)'
-#          command: 'chown -R circleci:circleci /home/circleci && install-and-test-ext check-failure'
-#          no_output_timeout: 2m
 #
 #  check-merge-to-enterprise:
 #    docker:
@@ -354,9 +346,13 @@ workflows:
           tag: 11.10-dev20201211-1
           make: check-follower-cluster
           requires: [build-11]
-#      - test-11_check-failure:
-#          requires: [build-11]
-#
+      - run-citus-test:
+          name: 'test-11_check-failure'
+          postgres: 11
+          image: citus/failtester
+          tag: 11.10-dev20201211-1
+          make: check-failure
+          requires: [build-11]
 
       - run-citus-test:
           name: 'test-12_check-multi'
@@ -406,8 +402,13 @@ workflows:
           tag: 12.5-dev20201211-1
           make: check-columnar-isolation
           requires: [build-12]
-#      - test-12_check-failure:
-#          requires: [build-12]
+      - run-citus-test:
+          name: 'test-12_check-failure'
+          postgres: 12
+          image: citus/failtester
+          tag: 12.5-dev20201211-1
+          make: check-failure
+          requires: [build-12]
 
       - run-citus-test:
           name: 'test-13_check-multi'
@@ -457,9 +458,13 @@ workflows:
           tag: 13.1-dev20201211-4
           make: check-columnar-isolation
           requires: [build-13]
-
-#      - test-13_check-failure:
-#          requires: [build-13]
+      - run-citus-test:
+          name: 'test-13_check-failure'
+          postgres: 13
+          image: citus/failtester
+          tag: 13.1-dev20201211-1
+          make: check-failure
+          requires: [build-13]
 
 #      - test-11-12_check-pg-upgrade:
 #          requires:
